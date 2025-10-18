@@ -1,11 +1,20 @@
-<script setup></script>
-
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div id="app">
+    <el-menu mode="horizontal" router>
+      <el-menu-item index="/">Список заявок</el-menu-item>
+      <el-menu-item index="/create">Создать заявку</el-menu-item>
+    </el-menu>
+
+    <router-view />
+  </div>
 </template>
 
-<style scoped></style>
+<script setup>
+// Здесь ничего не нужно, Vue Router сам подставит компоненты
+</script>
+
+<style>
+#app {
+  margin: 20px;
+}
+</style>
