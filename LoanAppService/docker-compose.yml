@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: loan_postgres
+    environment:
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: loansdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: LoanAppService.Api/Dockerfile
+    container_name: loan_backend
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=loansdb;Username=appuser;Password=secret
+    ports:
+      - "7117:80"
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./frontend/loan-frontend
+      dockerfile: Dockerfile
+    container_name: loan_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
