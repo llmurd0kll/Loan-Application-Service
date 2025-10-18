@@ -1,20 +1,20 @@
-using LoanAppService.Api.Data;
+﻿using LoanAppService.Api.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// �����������
+// Контроллеры
 builder.Services.AddControllers();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// ����������� � PostgreSQL
+// Подключение к PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// CORS ��� ���������
+// CORS для фронтенда
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendPolicy", policy =>
@@ -26,20 +26,28 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Настройка Kestrel
+builder.WebHost.ConfigureKestrel(options =>
+{
+    // Если переменная окружения DOTNET_RUNNING_IN_CONTAINER установлена,
+    // значит мы внутри Docker → слушаем порт 80
+    if (builder.Environment.IsProduction())
+    {
+        options.ListenAnyIP(80);
+    }
+});
+
 var app = builder.Build();
 
-// �������������� ��������
+// Автоматическая миграция
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
 }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseCors("FrontendPolicy");
 
